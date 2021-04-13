@@ -52,6 +52,45 @@ def mask(s):
     else:
         return s
 
+def password_check(password):
+    """
+    Verify the strength of 'password'
+    Returns a dict indicating the wrong criteria
+    A password is considered strong if:
+        10 characters length or more
+        1 digit or more
+        1 symbol or more
+        1 uppercase letter or more
+        1 lowercase letter or more
+    """
+
+    # calculating the length
+    length_error = len(password) < 10
+
+    # searching for digits
+    digit_error = re.search(r"\d", password) is None
+
+    # searching for uppercase
+    uppercase_error = re.search(r"[A-Z]", password) is None
+
+    # searching for lowercase
+    lowercase_error = re.search(r"[a-z]", password) is None
+
+    # searching for symbols
+    symbol_error = re.search(r"[ !#$%&'()*+,-./[\\\]^_`{|}~"+r'"]', password) is None
+
+    # overall result
+    password_ok = not ( length_error or digit_error or uppercase_error or lowercase_error or symbol_error )
+
+    return {
+        'password_ok' : password_ok,
+        'length_error' : length_error,
+        'digit_error' : digit_error,
+        'uppercase_error' : uppercase_error,
+        'lowercase_error' : lowercase_error,
+        'symbol_error' : symbol_error,
+    }
+
 
 ########
 # Main #
@@ -201,20 +240,24 @@ for filename in args.files:
                     # Complexity
                     if len(pot[hash]) == 0:
                         empty.append(user)
-                    elif len(pot[hash]) < 8:
+                    elif len(pot[hash]) < 10:
                         noncomplex.append(user)
                     else:
-                        score = 0
-                        if re.search("[A-Z]", pot[hash]):
-                            score += 1
-                        if re.search("[a-z]", pot[hash]):
-                            score += 1
-                        if re.search("[0-9]", pot[hash]):
-                            score += 1
-                        if pot[hash] and re.search("[^0-9a-zA-Z]", pot[hash]):
-                            score += 1
-                        if score < 3:
+                        pass_check = password_check(pot[hash])
+                        if pass_check.get('password_ok') == False:
+                            #print('failed complexity')
                             noncomplex.append(user)
+#                        score = 0
+#                        if re.search("[A-Z]", pot[hash]):
+#                            score += 1
+#                        if re.search("[a-z]", pot[hash]):
+#                            score += 1
+#                        if re.search("[0-9]", pot[hash]):
+#                            score += 1
+#                        if pot[hash] and re.search("[^0-9a-zA-Z]", pot[hash]):
+#                            score += 1
+#                        if score < 3:
+#                            noncomplex.append(user)
 
                     # Admin
                     if admin == 1:
